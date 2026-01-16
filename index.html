@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Villain Database</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 700px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 1.1em;
+        }
+
+        .form-container {
+            padding: 40px;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+            font-size: 0.95em;
+        }
+
+        input[type="text"],
+        input[type="number"],
+        input[type="tel"] {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: all 0.3s;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .file-input-wrapper {
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+            width: 100%;
+        }
+
+        .file-input-wrapper input[type="file"] {
+            position: absolute;
+            left: -9999px;
+        }
+
+        .file-input-label {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 12px 20px;
+            background: #f8f9fa;
+            border: 2px dashed #cbd5e0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+        }
+
+        .file-input-label:hover {
+            background: #e9ecef;
+            border-color: #667eea;
+        }
+
+        .file-input-label.has-file {
+            background: #e8f5e9;
+            border-color: #4caf50;
+            border-style: solid;
+        }
+
+        .file-name {
+            margin-top: 8px;
+            font-size: 0.9em;
+            color: #666;
+        }
+
+        .preview-image {
+            margin-top: 10px;
+            max-width: 100%;
+            max-height: 200px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .error-message {
+            background: #fee;
+            color: #c33;
+            padding: 12px 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid #c33;
+            display: none;
+        }
+
+        .success-message {
+            background: #e8f5e9;
+            color: #2e7d32;
+            padding: 12px 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid #4caf50;
+            display: none;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+        }
+
+        .submit-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .field-info {
+            font-size: 0.85em;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        .required-star {
+            color: #c33;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🦹‍♂️ Villain Database</h1>
+            <p>Register a new villain</p>
+        </div>
+
+        <div class="form-container">
+            <div id="errorMessage" class="error-message"></div>
+            <div id="successMessage" class="success-message"></div>
+
+            <form id="villainForm">
+                <div class="form-group">
+                    <label for="name">
+                        Villain Name
+                    </label>
+                    <input 
+                        type="text" 
+                        id="name" 
+                        name="name" 
+                        maxlength="20"
+                        placeholder="Enter villain name"
+                    >
+                    <div class="field-info">Maximum 20 characters</div>
+                </div>
+
+                <div class="form-group">
+                    <label for="health">
+                        Health Points
+                    </label>
+                    <input 
+                        type="number" 
+                        id="health" 
+                        name="health" 
+                        min="0"
+                        max="999999"
+                        placeholder="Enter health points"
+                    >
+                    <div class="field-info">Positive number, max 6 digits</div>
+                </div>
+
+                <div class="form-group">
+                    <label for="phone">
+                        Phone Number
+                    </label>
+                    <input 
+                        type="tel" 
+                        id="phone" 
+                        name="phone" 
+                        placeholder="+1234567890"
+                    >
+                    <div class="field-info">10-15 digits with optional +, spaces, dashes</div>
+                </div>
+
+                <div class="form-group">
+                    <label for="power">
+                        Power Photo
+                    </label>
+                    <div class="file-input-wrapper">
+                        <input 
+                            type="file" 
+                            id="power" 
+                            name="power" 
+                            accept="image/*"
+                        >
+                        <label for="power" class="file-input-label" id="powerLabel">
+                            📷 Choose power photo
+                        </label>
+                    </div>
+                    <div id="powerName" class="file-name"></div>
+                    <img id="powerPreview" class="preview-image" style="display: none;">
+                </div>
+
+                <div class="form-group">
+                    <label for="costume">
+                        Costume Photo
+                    </label>
+                    <div class="file-input-wrapper">
+                        <input 
+                            type="file" 
+                            id="costume" 
+                            name="costume" 
+                            accept="image/*"
+                        >
+                        <label for="costume" class="file-input-label" id="costumeLabel">
+                            📷 Choose costume photo
+                        </label>
+                    </div>
+                    <div id="costumeName" class="file-name"></div>
+                    <img id="costumePreview" class="preview-image" style="display: none;">
+                </div>
+
+                <button type="submit" class="submit-btn" id="submitBtn">
+                    Register Villain
+                </button>
+            </form>
+
+            <div id="loading" class="loading">
+                <div class="spinner"></div>
+                <p style="margin-top: 10px; color: #666;">Saving villain data...</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'https://villain-maxq.onrender.com/api/save';
+        
+        const form = document.getElementById('villainForm');
+        const submitBtn = document.getElementById('submitBtn');
+        const errorMessage = document.getElementById('errorMessage');
+        const successMessage = document.getElementById('successMessage');
+        const loading = document.getElementById('loading');
+
+        // File input handlers
+        function setupFileInput(inputId, labelId, nameId, previewId) {
+            const input = document.getElementById(inputId);
+            const label = document.getElementById(labelId);
+            const nameDisplay = document.getElementById(nameId);
+            const preview = document.getElementById(previewId);
+
+            input.addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    label.classList.add('has-file');
+                    label.textContent = '✓ File selected';
+                    nameDisplay.textContent = file.name;
+
+                    // Show preview for images
+                    if (file.type.startsWith('image/')) {
+                        const reader = new FileReader();
+                        reader.onload = function(e) {
+                            preview.src = e.target.result;
+                            preview.style.display = 'block';
+                        };
+                        reader.readAsDataURL(file);
+                    }
+                } else {
+                    label.classList.remove('has-file');
+                    label.textContent = `📷 Choose ${inputId} photo`;
+                    nameDisplay.textContent = '';
+                    preview.style.display = 'none';
+                }
+            });
+        }
+
+        setupFileInput('power', 'powerLabel', 'powerName', 'powerPreview');
+        setupFileInput('costume', 'costumeLabel', 'costumeName', 'costumePreview');
+
+        // Form submission
+        form.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            // Hide messages
+            errorMessage.style.display = 'none';
+            successMessage.style.display = 'none';
+
+            // Show loading
+            submitBtn.disabled = true;
+            loading.style.display = 'block';
+
+            try {
+                const formData = new FormData();
+
+                // Add text fields
+                const name = document.getElementById('name').value.trim();
+                const health = document.getElementById('health').value.trim();
+                const phone = document.getElementById('phone').value.trim();
+
+                if (name) formData.append('name', name);
+                if (health) formData.append('health', health);
+                if (phone) formData.append('phone', phone);
+
+                // Add files
+                const powerFile = document.getElementById('power').files[0];
+                const costumeFile = document.getElementById('costume').files[0];
+
+                if (powerFile) formData.append('power', powerFile);
+                if (costumeFile) formData.append('costume', costumeFile);
+
+                // Send request
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    // Success
+                    successMessage.textContent = `✓ Villain registered successfully! ID: ${data.id}`;
+                    successMessage.style.display = 'block';
+                    
+                    // Reset form
+                    form.reset();
+                    document.getElementById('powerLabel').classList.remove('has-file');
+                    document.getElementById('costumeLabel').classList.remove('has-file');
+                    document.getElementById('powerLabel').textContent = '📷 Choose power photo';
+                    document.getElementById('costumeLabel').textContent = '📷 Choose costume photo';
+                    document.getElementById('powerName').textContent = '';
+                    document.getElementById('costumeName').textContent = '';
+                    document.getElementById('powerPreview').style.display = 'none';
+                    document.getElementById('costumePreview').style.display = 'none';
+
+                    // Scroll to success message
+                    successMessage.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                } else {
+                    // Error
+                    errorMessage.textContent = `✗ ${data.error || 'Failed to save villain'}`;
+                    errorMessage.style.display = 'block';
+                    errorMessage.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                }
+            } catch (error) {
+                errorMessage.textContent = `✗ Network error: ${error.message}. Make sure the API server is running.`;
+                errorMessage.style.display = 'block';
+                errorMessage.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            } finally {
+                loading.style.display = 'none';
+                submitBtn.disabled = false;
+            }
+        });
+
+        // Real-time validation feedback
+        document.getElementById('name').addEventListener('input', function(e) {
+            const value = e.target.value;
+            if (value.length > 20) {
+                e.target.style.borderColor = '#c33';
+            } else {
+                e.target.style.borderColor = '#e0e0e0';
+            }
+        });
+
+        document.getElementById('health').addEventListener('input', function(e) {
+            const value = e.target.value;
+            if (value && (value < 0 || value.includes('.') || value.length > 6)) {
+                e.target.style.borderColor = '#c33';
+            } else {
+                e.target.style.borderColor = '#e0e0e0';
+            }
+        });
+
+        document.getElementById('phone').addEventListener('input', function(e) {
+            const value = e.target.value.replace(/[^\d]/g, '');
+            if (value.length > 15 || value.length < 10) {
+                e.target.style.borderColor = '#c33';
+            } else {
+                e.target.style.borderColor = '#e0e0e0';
+            }
+        });
+    </script>
+</body>
+</html>
